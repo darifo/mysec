@@ -63,11 +63,9 @@ module.exports = defineConfig({
           ]
         },
         "mac": {
+          // "target": "dmg",
           "icon": "resource/icons/mac/icon.icns"
         },
-        "linux": {
-          "icon": "resource/icons"
-        }
       }
     }
   }
