@@ -1,0 +1,65 @@
+{
+  "name": "mysec",
+  "version": "0.1.1",
+  "private": true,
+  "description": "私人本地密码管理工具",
+  "author": {
+    "email": "2248961461@qq.com",
+    "name": "darifo",
+    "url": "https://github.com/darifo"
+  },
+  "scripts": {
+    "lint": "vue-cli-service lint",
+    "start:dev": "vue-cli-service electron:serve --mode dev",
+    "build:mac": "vue-cli-service electron:build --macos --mode prod",
+    "build:win": "vue-cli-service electron:build --windows --mode prod",
+    "postinstall": "electron-builder install-app-deps",
+    "postuninstall": "electron-builder install-app-deps",
+    "electron:icons": "electron-icon-builder --input=./src/assets/logo.png --output=./resource/"
+  },
+  "main": "background.js",
+  "dependencies": {
+    "core-js": "^3.8.3",
+    "element-plus": "^2.2.17",
+    "fs": "^0.0.1-security",
+    "nedb": "^1.8.0",
+    "path": "^0.12.7",
+    "vue": "^3.2.13",
+    "vue-electron": "^1.0.6",
+    "vue-router": "^4.1.5",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "electron": "^13.0.0",
+    "electron-devtools-installer": "^3.1.0",
+    "electron-icon-builder": "^2.0.1",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "vue-cli-plugin-electron-builder": "~2.1.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}
