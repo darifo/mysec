@@ -17,7 +17,7 @@ module.exports = defineConfig({
     //electronBuilder配置
     electronBuilder: {
       builderOptions: {
-        "productName": 'PasswordManager',//生成exe的名字
+        "productName": 'Mysec',//生成exe的名字
         "appId": "dev.darifo.mysec",//包名  
         "copyright": "Copyright © 2022 by darifo",//版权信息
         "directories": { // 输出文件夹
@@ -32,7 +32,7 @@ module.exports = defineConfig({
           "installerHeaderIcon": "resource/icons/win/icon.ico", // 安装时头部图标
           "createDesktopShortcut": true, // 是否创建桌面图标
           "createStartMenuShortcut": true,// 是否创建开始菜单图标
-          "shortcutName": "PasswordManager", // 快捷方式名称
+          "shortcutName": "Mysec", // 快捷方式名称
           "runAfterFinish": false,//是否安装完成后运行
         },
         "dmg": {

@@ -104,23 +104,11 @@
                    layout="prev, pager, next"
                    :total="1000"
                    :pager-count="5" />
-
-    <!-- <el-row justify="center">
-      <el-col :span="2">
-        <div class="grid-content" />&nbsp;
-      </el-col>
-      <el-col :span="18">
-       
-      </el-col>
-
-      <el-col :span="2">
-        <div class="grid-content" />&nbsp;
-      </el-col>
-    </el-row> -->
+    <br />
 
     <el-dialog v-model="dialogFormVisible"
                :close-on-click-modal=false
-               title="添加一个密钥">
+               title="添加信息">
       <el-form :model="addForm">
         <el-form-item label="名称">
           <el-input v-model="addForm.name"
@@ -160,34 +148,14 @@
 </template>
 
 <script>
+import data from './tableData';
 export default {
     data() {
         return {
             dialogFormVisible: false,
             addForm: {},
             search: '',
-            tableData: [
-                {
-                    id: 1,
-                    name: '测试密码',
-                    account: 'admin',
-                    password: '***',
-                    tags: [
-                        { content: '标签1', type: 'success' },
-                        { content: '标签2', type: 'danger' },
-                    ],
-                },
-                {
-                    id: 2,
-                    name: '测试密码222',
-                    account: 'root',
-                    password: '***',
-                    tags: [
-                        { content: '标签11', type: 'warning' },
-                        { content: '标签22', type: 'success' },
-                    ],
-                },
-            ],
+            tableData: data,
             options: [
                 { value: 'test', label: '测试' },
                 { value: 'prod', label: '生产' },

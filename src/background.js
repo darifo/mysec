@@ -26,8 +26,10 @@ let win;
 async function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({
-    width: 800,
+    width: 900,
     height: 600,
+    minHeight: 600,
+    minWidth: 800,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -43,11 +45,12 @@ async function createWindow () {
     // Load the index.html when not in development
     win.loadURL('app://./index.html');
   }
+  // win.maximize();
   // 窗口尺寸改变事件
   win.on('resize', () => {
-    const docHeight = win.getSize()[1] - 200;
+    const docHeight = win.getSize()[1] - 230;
     const docWidth = win.getSize()[0];
-    win.webContents.send("test_ipc_b", { height: docHeight, width: docWidth });
+    win.webContents.send("ipc_win_resize", { height: docHeight, width: docWidth });
   });
 }
 
@@ -107,15 +110,9 @@ if (isDevelopment) {
   }
 }
 
-
-
-ipcMain.on("test_ipc_a", (e, data) => {
-  // console.log(new Date());
-  console.log("ipc_data:", data);
-  // e.sender.send("test_ipc_b", "主进程发送到渲染进程的消息～");
-
+ipcMain.on("ipc_win_init_size", (e, data) => {
+  console.log("ipc_win_init_size:", data);
   const docHeight = win.getSize()[1] - 200;
   const docWidth = win.getSize()[0];
-
-  e.sender.send("test_ipc_b", { height: docHeight, width: docWidth });
+  e.sender.send("ipc_win_resize", { height: docHeight, width: docWidth });
 });
