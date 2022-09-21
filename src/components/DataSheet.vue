@@ -52,7 +52,14 @@
       <el-table-column label="名称"
                        prop="name" />
       <el-table-column label="账号"
-                       prop="account" />
+                       prop="account">
+        <template v-slot="scope">
+          <el-link @click="handleCopyAccount(scope.$index, scope.row.account);"
+                   :underline="false"
+                   style="color:red">{{scope.row.account}}</el-link>
+        </template>
+
+      </el-table-column>
       <el-table-column label="密码"
                        prop="password">
         <template v-slot="scope">
@@ -62,6 +69,23 @@
                      @click="handleCopyPassword(scope.$index, scope.row.password)">复制密码</el-button>
         </template>
       </el-table-column>
+
+      <el-table-column label="地址"
+                       prop="addr">
+        <template v-slot="scope">
+          <el-tooltip class="box-item"
+                      effect="dark"
+                      placement="top"
+                      :content="scope.row.addr">
+            <el-link :href="scope.row.addr"
+                     :underline="false"
+                     target="_blank"
+                     style="color:lightseagreen">跳转</el-link>
+          </el-tooltip>
+
+        </template>
+      </el-table-column>
+
       <el-table-column label="标签"
                        prop="tags">
         <template v-slot="scope">
@@ -148,6 +172,7 @@
 </template>
 
 <script>
+import { ElMessage } from 'element-plus';
 import data from './tableData';
 export default {
     data() {
@@ -169,8 +194,18 @@ export default {
         },
     },
     methods: {
+        handleCopyAccount(index, account) {
+            ElMessage({
+                message: 'handleCopyAccount: ' + account,
+                type: 'success',
+            });
+        },
         handleCopyPassword(index, password) {
             console.log(index, password);
+            ElMessage({
+                message: 'handleCopyPassword: ' + password,
+                type: 'success',
+            });
         },
         handleCopy(index, row) {
             console.log(index, row);
@@ -184,7 +219,6 @@ export default {
         handleDelete(index, row) {
             console.log(index, row);
         },
-
         handleAdd() {
             // ElMessageBox.prompt();
             this.dialogFormVisible = true;
