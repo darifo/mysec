@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import electron from 'electron';
+import { ipcRenderer } from 'electron';
 import { useStore } from 'vuex';
 
 export default {
@@ -45,17 +45,14 @@ export default {
     components: {},
     created() {
         const store = useStore();
-        const ipc = electron.ipcRenderer;
-        ipc.send('ipc_win_init_size', '请求获取窗口初始尺寸');
-        // 监听窗口尺寸改变
-        ipc.on('ipc_win_resize', (e, data) => {
-            // console.log(new Date());
+        // 窗口尺寸改变
+        ipcRenderer.on('ipc_win_resize', (e, data) => {
             console.log('ipc_win_resize:', data);
             store.commit('RESIZE_WIN', data);
         });
-        // 监听菜单点击
+        // 监听主进程菜单点击事件
         let _this = this;
-        ipc.on('ipc_menu_click', (e, code) => {
+        ipcRenderer.on('ipc_menu_click', (e, code) => {
             console.log('ipc_menu_click:', code);
             if (code === 'ABOUT_ME') {
                 _this.dialogAboutVisible = true;
@@ -64,6 +61,14 @@ export default {
     },
     mounted() {},
     methods: {},
+    beforeCreate() {
+        // 从主进程获取APP信息，存储到store
+        const store = useStore();
+        ipcRenderer.on('ipc_recive_app_info', (e, data) => {
+            console.log('ipc_recive_app_info:', data);
+            store.commit('SAVE_APP_INFO', data);
+        });
+    },
 };
 </script>
 

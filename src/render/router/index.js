@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-import UserLogin from '@/components/UserLogin';
-import DataSheet from '@/components/DataSheet';
+import UserLogin from '@/render/components/UserLogin';
+import DataSheet from '@/render/components/DataSheet';
 
 const routes = [
     { path: '/', component: UserLogin },

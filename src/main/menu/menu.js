@@ -1,3 +1,5 @@
+// ================== 存放 APP 的菜单及处理逻辑  ===================== //
+
 import { BrowserWindow } from "electron";
 
 const AppMenu = [

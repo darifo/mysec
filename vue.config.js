@@ -7,7 +7,13 @@ module.exports = defineConfig({
   configureWebpack: {
     externals: {
       "fs": "require('fs')",
-      "electron": "window.require('electron')"
+      "electron": "window.require('electron')",
+      "sqlite3": "require('sqlite3')",
+    },
+  },
+  pages: {
+    index: {
+      entry: 'src/render/main.js',
     },
   },
   //判断开发模式还是生产模式

@@ -15,15 +15,15 @@
     "build:win": "vue-cli-service electron:build --windows --mode prod",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps",
-    "electron:icons": "electron-icon-builder --input=./src/assets/logo.png --output=./resource/"
+    "electron:icons": "electron-icon-builder --input=./src/render/assets/logo.png --output=./resource/"
   },
   "main": "background.js",
   "dependencies": {
     "core-js": "^3.8.3",
     "element-plus": "^2.2.17",
     "fs": "^0.0.1-security",
-    "nedb": "^1.8.0",
     "path": "^0.12.7",
+    "sqlite3": "^5.1.1",
     "vue": "^3.2.13",
     "vue-electron": "^1.0.6",
     "vue-router": "^4.1.5",
