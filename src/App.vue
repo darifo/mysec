@@ -1,34 +1,32 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useStore } from 'vuex';
+import { inject, ref } from "vue";
+import { useStore } from "vuex";
 
-const electron = require('electron');
-
+const main = inject("$main") as any;
+const ipc = main.ipcRenderer;
 const store = useStore();
 
-let dialogAboutVisible = ref(false)
-
-const version = store.state.app_info.app_version
+let dialogAboutVisible = ref(false);
+let version = ref("0.0.0");
 
 // 从主进程获取APP信息，存储到store
-electron.ipcRenderer.on('ipc_recive_app_info', (e, data) => {
-  console.log('ipc_recive_app_info:', data);
-  store.commit('SAVE_APP_INFO', data);
+ipc.on("ipc_recive_app_info", (e: string, data: any) => {
+  console.log("ipc_recive_app_info:", data);
+  store.commit("SAVE_APP_INFO", data);
+  version.value = store.state.app_info.app_version
 });
-
 // 窗口尺寸改变
-electron.ipcRenderer.on('ipc_win_resize', (e, data) => {
-  console.log('ipc_win_resize:', data);
-  store.commit('RESIZE_WIN', data);
+ipc.on("ipc_win_resize", (e: string, data: any) => {
+  console.log("ipc_win_resize:", data);
+  store.commit("RESIZE_WIN", data);
 });
 // 监听主进程菜单点击事件
-electron.ipcRenderer.on('ipc_menu_click', (e, code) => {
-  console.log('ipc_menu_click:', code);
-  if (code === 'ABOUT_ME') {
+ipc.on("ipc_menu_click", (e: string, code: string) => {
+  console.log("ipc_menu_click:", code);
+  if (code === "ABOUT_ME") {
     dialogAboutVisible.value = true;
   }
 });
-
 </script>
 
 <template>
@@ -63,5 +61,4 @@ electron.ipcRenderer.on('ipc_menu_click', (e, code) => {
 </template>
 
 <style scoped>
-
 </style>

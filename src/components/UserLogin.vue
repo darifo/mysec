@@ -1,56 +1,51 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { computed, inject } from "vue";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 
-// sqlite3 DB类型
-type DBT = {
-  Database: any
-}
+const main = inject("$main") as any;
+const ipc = main.ipcRenderer;
+const Router = useRouter();
+const store = useStore();
 
-const DB = inject("DB") as DBT
-
-let users = {}
-
-const Router = useRouter()
-
-const store = useStore()
-
+let users = {};
 let height = computed({
-  get(): number { return store.state.doc_height },
-  set(newVal: number) { }
-})
+  get(): number {
+    return store.state.doc_height;
+  },
+  set(newVal: number) {},
+});
 
 const UserForm = {
-  password: ""
-}
+  password: "",
+};
 
 const loginButton = computed({
-  get(): boolean { return store.state.app_info.is_init_root },
-  set(newVal) { }
+  get(): boolean {
+    return store.state.app_info.is_init_root;
+  },
+  set(newVal) {},
 });
 const setPwdButton = computed({
-  get(): boolean { return !store.state.app_info.is_init_root },
-  set(newVal) { }
+  get(): boolean {
+    return !store.state.app_info.is_init_root;
+  },
+  set(newVal) {},
 });
 
 const loginCheck = () => {
-  const dbPath = store.state.app_info.db_path;
-  // const DB = inject("$DB");
-  const db = new DB.Database(dbPath);
-  db.all("SELECT * FROM user where account = 'root' LIMIT 1", (err: string, row: any) => {
-    users = row;
-    alert(JSON.stringify(row));
-    Router.push({
-      name: "LIST",
-      params: {}
-    })
+  ipc.on("ipc_recive_data", (e: string, data: any) => {
+    console.log(data);
+    alert(JSON.stringify(data));
   });
-}
-const setRootPassword = () => {
+  ipc.send("ipc_sel_data", { action: "req_data" });
 
-}
-
+  Router.push({
+    name: "LIST",
+    params: {},
+  });
+};
+const setRootPassword = () => {};
 </script>
 
 <template>
