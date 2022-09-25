@@ -3,8 +3,15 @@ import { app } from 'electron'
 import path from 'path'
 
 const Datastore = require('nedb')
-export const dbPath = path.join(app.getPath('userData'), 'mysec_data.db')
-export const db = new Datastore({
+
+export const dbPathUser = path.join(app.getPath('userData'), 'mysec_user.db')
+export const dbUser = new Datastore({
   autoload: true,
-  filename: dbPath,
+  filename: dbPathUser,
+})
+
+export const dbPathData = path.join(app.getPath('userData'), 'mysec_data.db')
+export const dbData = new Datastore({
+  autoload: true,
+  filename: dbPathData,
 })

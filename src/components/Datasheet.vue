@@ -60,7 +60,7 @@ const handleAdd = () => {
 </script>
 
 <template>
-    <div :style="{'height': height + 'px'}">
+    <div class="sheet_div" :style="{'height': height + 'px'}">
         <el-row>
             <el-col :span="12">
                 <div class="grid-content"
@@ -232,5 +232,11 @@ const handleAdd = () => {
 </template>
 
 <style scoped>
+
+  .sheet_div{
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+  }
 
 </style>

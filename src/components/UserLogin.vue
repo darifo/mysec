@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { ElMessageBox } from "_element-plus@2.2.17@element-plus";
 
 const main = inject("$main") as any;
 const ipc = main.ipcRenderer;
@@ -16,9 +17,9 @@ let height = computed({
   set(newVal: number) {},
 });
 
-const UserForm = {
+let UserForm= ref({
   password: "",
-};
+});
 
 const loginButton = computed({
   get(): boolean {
@@ -45,7 +46,13 @@ const loginCheck = () => {
     params: {},
   });
 };
-const setRootPassword = () => {};
+const setRootPassword = () => {
+  ipc.send("ipc_set_root_pwd", UserForm.value.password);
+
+  ElMessageBox.alert("设置密码成功！", "提示", {})
+  UserForm.value.password = ""
+  // store.state.app_info.is_init_root = true;
+};
 </script>
 
 <template>

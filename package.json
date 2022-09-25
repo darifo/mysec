@@ -19,13 +19,15 @@
     "electron:icons": "electron-icon-builder --input=./src/assets/logo.png --output=./resource/"
   },
   "dependencies": {
+    "crypto-js": "^4.1.1",
     "element-plus": "^2.2.17",
+    "nedb": "^1.8.0",
     "vue": "^3.2.37",
     "vue-router": "^4.1.5",
-    "vuex": "^4.0.2",
-    "nedb": "^1.8.0"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.1.1",
     "@vitejs/plugin-vue": "^3.1.0",
     "electron": "^20.2.0",
     "electron-builder": "^23.3.3",
