@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref } from "vue";
+import { computed, inject, ref, onMounted, reactive, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { ElMessageBox } from "_element-plus@2.2.17@element-plus";
@@ -8,58 +8,69 @@ const main = inject("$main") as any;
 const ipc = main.ipcRenderer;
 const Router = useRouter();
 const store = useStore();
-
 let users = {};
-let height = computed({
-  get(): number {
-    return store.state.doc_height;
-  },
-  set(newVal: number) {},
-});
+let height = computed(() => store.state.doc_height);
+let UserForm = reactive({ password: "" });
+const loginButton = computed(() => store.state.app_info.is_init_root);
+const setPwdButton = computed(() => !store.state.app_info.is_init_root);
+const setPwdButtonDisable = computed(() => UserForm.password == "");
 
-let UserForm= ref({
-  password: "",
-});
-
-const loginButton = computed({
-  get(): boolean {
-    return store.state.app_info.is_init_root;
-  },
-  set(newVal) {},
-});
-const setPwdButton = computed({
-  get(): boolean {
-    return !store.state.app_info.is_init_root;
-  },
-  set(newVal) {},
-});
-
+const listenerfun = (e: string, data: any) => {
+  console.log(data);
+  if (data.rStatus === true) {
+    Router.push({
+      name: "LIST",
+      params: {},
+    });
+  } else {
+    ElMessageBox.alert("主密码错误！", "警告", {});
+  }
+};
 const loginCheck = () => {
-  ipc.on("ipc_recive_data", (e: string, data: any) => {
-    console.log(data);
-    alert(JSON.stringify(data));
-  });
-  ipc.send("ipc_sel_data", { action: "req_data" });
-
-  Router.push({
-    name: "LIST",
-    params: {},
-  });
+  // Router.push({
+  //     name: "LIST",
+  //     params: {},
+  //   });
+  if (UserForm.password == "") {
+    ElMessageBox.alert("密码不能为空！", "警告", {});
+  } else if (UserForm.password.length < 8) {
+    ElMessageBox.alert("密码长度大于等于8位字符！", "警告", {});
+  } else {
+    ipc.send("ipc_check_root", {
+      msg: "请求检查主密码是否正确",
+      password: UserForm.password,
+    });
+  }
 };
 const setRootPassword = () => {
-  ipc.send("ipc_set_root_pwd", UserForm.value.password);
-
-  ElMessageBox.alert("设置密码成功！", "提示", {})
-  UserForm.value.password = ""
-  // store.state.app_info.is_init_root = true;
+  // 校验密码
+  if (UserForm.password == "") {
+    ElMessageBox.alert("密码不能为空！", "警告", {});
+  } else if (UserForm.password.length < 8) {
+    ElMessageBox.alert("密码长度必须大于等于8位字符！", "警告", {});
+  } else {
+    ipc.send("ipc_set_root_pwd", UserForm.password);
+    ElMessageBox.alert("设置密码成功！", "提示", {});
+    UserForm.password = "";
+    store.state.app_info.is_init_root = true;
+  }
 };
+
+onMounted(() => {
+  ipc.on("ipc_check_result", listenerfun);
+});
+
+onUnmounted(() => {
+  ipc.removeListener("ipc_check_result", listenerfun);
+});
 </script>
 
 <template>
   <el-container>
     <el-main class="cc"
              :style="{'height': height + 'px'}">
-      <el-form :model="UserForm"
+      <el-form @submit.enter.prevent
+               :model="UserForm"
                :inline="true">
         <el-form-item label="密码"
                       prop="password"
@@ -78,6 +89,7 @@ const setRootPassword = () => {
           <el-button v-if="setPwdButton"
                      type="primary"
                      size="small"
+                     :disabled="setPwdButtonDisable"
                      @click="setRootPassword">设置密码</el-button>
         </el-form-item>
       </el-form>

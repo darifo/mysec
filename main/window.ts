@@ -22,10 +22,11 @@ export const createWindow = async () => {
     await win.loadURL(url)
     win.webContents.openDevTools()
   }
+  // win.webContents.openDevTools()
 
   // 窗口尺寸改变事件
   win.on('resized', () => {
-    const docHeight = win.getSize()[1] - 50
+    const docHeight = win.getSize()[1] - 100
     const docWidth = win.getSize()[0]
     console.log(docHeight, docWidth)
     win.webContents.send('ipc_win_resize', {
@@ -34,7 +35,7 @@ export const createWindow = async () => {
     })
   })
   // 窗口显示的时候给渲染进程发送初始窗口尺寸
-  const docHeight = win.getSize()[1] - 50
+  const docHeight = win.getSize()[1] - 100
   const docWidth = win.getSize()[0]
   console.log(docHeight, docWidth)
   win.webContents.send('ipc_win_resize', { height: docHeight, width: docWidth })

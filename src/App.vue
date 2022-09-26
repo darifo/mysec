@@ -1,31 +1,52 @@
 <script setup lang="ts">
-import { inject, ref } from "vue";
+import { inject, onMounted, onUnmounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
 const main = inject("$main") as any;
 const ipc = main.ipcRenderer;
 const store = useStore();
+const Router = useRouter();
 
 let dialogAboutVisible = ref(false);
 let version = ref("0.0.0");
 
-// 从主进程获取APP信息，存储到store
-ipc.on("ipc_recive_app_info", (e: string, data: any) => {
+const ipcAppInfoListener = (e: string, data: any) => {
   console.log("ipc_recive_app_info:", data);
   store.commit("SAVE_APP_INFO", data);
-  version.value = store.state.app_info.app_version
-});
-// 窗口尺寸改变
-ipc.on("ipc_win_resize", (e: string, data: any) => {
+  version.value = store.state.app_info.app_version;
+};
+
+const ipcWinResizeListener = (e: string, data: any) => {
   console.log("ipc_win_resize:", data);
   store.commit("RESIZE_WIN", data);
-});
-// 监听主进程菜单点击事件
-ipc.on("ipc_menu_click", (e: string, code: string) => {
+};
+const ipcMenuClickListener = (e: string, code: string) => {
   console.log("ipc_menu_click:", code);
   if (code === "ABOUT_ME") {
     dialogAboutVisible.value = true;
   }
+  if (code === "CLOCK_PAGE") {
+    Router.push({
+      name: "HOME",
+      params: {},
+    });
+  }
+};
+
+onMounted(() => {
+  // 从主进程获取APP信息，存储到store
+  ipc.on("ipc_recive_app_info", ipcAppInfoListener);
+  // 窗口尺寸改变
+  ipc.on("ipc_win_resize", ipcWinResizeListener);
+  // 监听主进程菜单点击事件
+  ipc.on("ipc_menu_click", ipcMenuClickListener);
+});
+
+onUnmounted(() => {
+  // ipc.removeListener("ipc_recive_app_info", ipcAppInfoListener);
+  // ipc.removeListener("ipc_win_resize", ipcWinResizeListener);
+  // ipc.removeListener("ipc_menu_click", ipcMenuClickListener);
 });
 </script>
 
