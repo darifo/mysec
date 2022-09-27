@@ -1,7 +1,14 @@
 import { app, ipcMain, Menu, shell } from 'electron'
 import AppMenu from './menu'
 import { Redy, WebContentsCreated, WinAllClose } from './events'
-import { IPC_CHECK_ROOT, IPC_SAVE_DATA, IPC_SET_ROOT_PWD, IPC_GET_LIST_REQ } from './ipcs'
+import {
+  IPC_CHECK_ROOT,
+  IPC_SAVE_DATA,
+  IPC_SET_ROOT_PWD,
+  IPC_GET_LIST_REQ,
+  IPC_GET_TAG_LIST_REQ,
+  IPC_DELETE_DATA,
+} from './ipcs'
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
@@ -18,3 +25,5 @@ ipcMain.on('ipc_check_root', IPC_CHECK_ROOT)
 ipcMain.on('ipc_set_root_pwd', IPC_SET_ROOT_PWD)
 ipcMain.on('ipc_save_data', IPC_SAVE_DATA)
 ipcMain.on('ipc_get_list_req', IPC_GET_LIST_REQ)
+ipcMain.on('ipc_get_tag_list_req', IPC_GET_TAG_LIST_REQ)
+ipcMain.on('ipc_delete_data', IPC_DELETE_DATA)

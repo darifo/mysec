@@ -41,7 +41,7 @@ type AddForm = {
   password: string
   account: string
   addr: string
-  tag: string
+  tags: string
   remark: string
 }
 
@@ -52,8 +52,9 @@ export const IPC_SAVE_DATA = (e: any, data: AddForm) => {
     password: AES.encrypt(data.password),
     account: data.account,
     addr: data.addr,
-    tag: data.tag,
+    tags: data.tags,
     remark: data.remark,
+    t: Date.parse(new Date().toString()),
   }
   dbData.insert(insertData, (err: string, newDoc: any) => {
     console.log(newDoc)
@@ -64,18 +65,26 @@ export const IPC_SAVE_DATA = (e: any, data: AddForm) => {
 export const IPC_GET_LIST_REQ = async (e: any, data: any) => {
   console.log(data)
   const search = data.search
+  const tags = data.tags
   const pageNum = data.page_num
   const pageSize = data.page_size
   const getList = () => {
     return new Promise(async (resolve) => {
       // sort: 字段名 + 排序方式（1升序 -1降序）
       // skip：跳过 limit：限制
-      let where = {}
+      let where1 = {}
+      let where2 = {}
       if (search !== '') {
         // 转换为正则模糊搜索
         const regexp = new RegExp(search)
-        where = { name: regexp }
+        where1 = { name: regexp }
       }
+      if (tags.length > 0) {
+        where2 = { tags: { $in: tags } }
+      }
+      // 合并查询条件
+      let where = Object.assign(where1, where2)
+      // console.log(where)
       const countPromi = () => {
         return new Promise((resolve) => {
           dbData.count(where, (err: string, count: number) => {
@@ -88,7 +97,7 @@ export const IPC_GET_LIST_REQ = async (e: any, data: any) => {
         return new Promise((resolve) => {
           dbData
             .find(where)
-            .sort({ _id: 1 })
+            .sort({ t: -1 })
             .skip((pageNum - 1) * pageSize)
             .limit(pageSize)
             .exec((err: string, docs: any) => {
@@ -102,4 +111,43 @@ export const IPC_GET_LIST_REQ = async (e: any, data: any) => {
   }
   let res = await getList()
   e.sender.send('ipc_get_list', res)
+}
+
+// 读取所有数据标签（去重复）
+export const IPC_GET_TAG_LIST_REQ = async (e: any, data: any) => {
+  const getList = () => {
+    return new Promise<any[]>(async (resolve) => {
+      dbData
+        .find({})
+        .sort({ t: -1 })
+        .exec((err: string, docs: any) => {
+          resolve(docs)
+        })
+    })
+  }
+  let list = await getList()
+  let alltags: any = []
+  for (let item of list) {
+    const curTags = item.tags
+    for (let tag of curTags) {
+      // 去重复
+      if (alltags.indexOf(tag) == -1) {
+        alltags.push(tag)
+      }
+    }
+  }
+  // console.log(alltags)
+  e.sender.send('ipc_get_tag_list', alltags)
+}
+
+// 删除数据行
+export const IPC_DELETE_DATA = async (e: any, data: any) => {
+  // console.log(data)
+  dbData.remove(
+    { _id: data },
+    {},
+    function (err: string, numRemoved: number) {
+      console.log('removed:' + numRemoved)
+    },
+  )
 }

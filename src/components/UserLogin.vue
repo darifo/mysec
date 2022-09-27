@@ -16,7 +16,7 @@ const setPwdButton = computed(() => !store.state.app_info.is_init_root);
 const setPwdButtonDisable = computed(() => UserForm.password == "");
 
 const listenerfun = (e: string, data: any) => {
-  console.log(data);
+  // console.log(data);
   if (data.rStatus === true) {
     Router.push({
       name: "LIST",
@@ -56,6 +56,16 @@ const setRootPassword = () => {
   }
 };
 
+const enterInputHandler = () => {
+  // console.log(loginButton.value, setPwdButton.value);
+  if (loginButton.value) {
+    loginCheck();
+  }
+  if (setPwdButton.value) {
+    setRootPassword();
+  }
+};
+
 onMounted(() => {
   ipc.on("ipc_check_result", listenerfun);
 });
@@ -78,6 +88,7 @@ onUnmounted(() => {
                         { required: true, message: 'password is required' },
                       ]">
           <el-input v-model.number="UserForm.password"
+                    @keyup.enter="enterInputHandler"
                     type="password"
                     autocomplete="off" />
         </el-form-item>
