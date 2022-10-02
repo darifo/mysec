@@ -99,6 +99,9 @@ onUnmounted(() => {
       <br />
       <el-link type="primary" :underline="false" target="_blank" href="https://github.com/darifo/mysec"
         style="color:darkcyan"> Mysec {{ version }}</el-link>
+      <br />
+      <el-link type="primary" :underline="false" target="_blank" href="https://github.com/darifo/mysec/releases"
+        style="color:darkcyan"> releases </el-link>
     </div>
   </el-dialog>
 

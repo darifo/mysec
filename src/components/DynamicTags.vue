@@ -11,13 +11,21 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, ref, defineEmits } from "vue";
+import { nextTick, ref, defineEmits, defineProps,toRefs, onMounted } from "vue";
 import { ElInput } from "element-plus";
 
 const emit = defineEmits(["pushTags"])
 
+//子组件接收父组件传递过来的值
+const props = defineProps<{
+  dynamicTags: string[],
+}>();
+
+//使用父组件传递过来的值
+const { dynamicTags } = toRefs(props)
+
 const inputValue = ref("");
-const dynamicTags = ref<string[]>([]);
+// const dynamicTags = ref<string[]>([]);
 const inputVisible = ref(false);
 const InputRef = ref<InstanceType<typeof ElInput>>();
 

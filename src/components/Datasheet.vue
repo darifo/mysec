@@ -19,6 +19,7 @@ import { useStore } from "vuex";
 import { string } from "yargs";
 
 let dialogFormVisible = ref(false);
+let dialogEditFormVisible = ref(false);
 
 const main = inject("$main") as any;
 
@@ -32,6 +33,16 @@ let addForm = reactive({
   addr: "",
   tags: [],
   remark: "",
+});
+let editForm = reactive({
+  _id: "",
+  name: "",
+  password: "",
+  account: "",
+  addr: "",
+  tags: [],
+  remark: "",
+  t: ""
 });
 let tableData: any[] = reactive([]);
 let totalCount = ref(0);
@@ -50,22 +61,71 @@ const handleCopyAccount = (index: number, account: string) => {
   });
 };
 const handleCopyPassword = (index: number, password: string) => {
-  // console.log(index, password);
   main.clipboard.writeText(AES.decrypt(password), 'selection')
   ElMessage({
     message: "密码明文复制成功！ ",
     type: "success",
   });
 };
+
 const handleCopy = (index: number, row: any) => {
   console.log(index, row);
+  const copyRow = {
+    name: row.name,
+    password: AES.decrypt(row.password),
+    account: row.account,
+    addr: row.addr,
+    tags: toRaw(row.tags),
+    remark: row.remark,
+  }
+  main.clipboard.writeText(JSON.stringify(copyRow), 'selection')
+  ElMessage({
+    message: "密码明文复制成功！ ",
+    type: "success",
+  });
 };
-const handleShow = (index: number, row: any) => {
-  console.log(index, row);
-};
+// const handleShow = (index: number, row: any) => {
+//   console.log(index, row);
+// };
+
+// 点击编辑按钮
 const handleEdit = (index: number, row: any) => {
-  console.log(index, row);
+  // console.log(index, row);
+  dialogEditFormVisible.value = true
+  editForm._id = row.ID
+  editForm.account = row.account
+  editForm.name = row.name
+  editForm.password = AES.decrypt(row.password)
+  editForm.addr = row.addr
+  editForm.tags = toRaw(row.tags)
+  editForm.remark = row.remark
+  editForm.t = row.t
+  // 传递给子组件
+  dynamicTags.value = toRaw(row.tags)
 };
+// 提交编辑保存
+const handleEditSave = () => {
+  let sendData = {
+    _id: editForm._id,
+    name: editForm.name,
+    password: editForm.password,
+    account: editForm.account,
+    tags: toRaw(editForm.tags),
+    addr: editForm.addr,
+    remark: editForm.remark,
+    t: editForm.t
+  }
+  ipc.send("ipc_edit_data", sendData);
+  ElMessage({
+    message: "编辑成功！",
+    type: "success",
+  });
+  dialogEditFormVisible.value = false;
+  sendGetListReq([], search.value, 1);
+  sendGetTagListReq();
+  // console.log(sendData);
+}
+
 const handleDelete = (index: number, row: any) => {
 
   ElMessageBox.confirm(
@@ -134,6 +194,7 @@ const listGetListener = (e: string, data: any) => {
       tags: item.tags,
       remark: item.remark,
       ID: item._id,
+      t: item.t
     };
     tableData.push(line);
   }
@@ -159,9 +220,13 @@ const sendGetTagListReq = () => {
 }
 
 const getTags = (tags: any) => {
-  // console.log(tags);
   addForm.tags = tags
 }
+const getEditTags = (tags: any) => {
+  editForm.tags = tags
+}
+// 定义子组件修改使用的数据
+const dynamicTags: any = ref([]);
 
 onMounted(() => {
   ipc.on("ipc_get_list", listGetListener);
@@ -257,9 +322,9 @@ watch(chooseTag, (newVal, oldVal) => {
 
       <el-table-column fixed="right" label="操作">
         <template v-slot="scope">
-          <!-- <el-button size="small" link type="success" @click="handleCopy(scope.$index, scope.row)">复制</el-button>
-          <el-button size="small" link type="primary" @click="handleShow(scope.$index, scope.row)">详情</el-button>
-          <el-button size="small" link type="warning" @click="handleEdit(scope.$index, scope.row)">编辑</el-button> -->
+          <el-button size="small" link type="success" @click="handleCopy(scope.$index, scope.row)">复制</el-button>
+          <!-- <el-button size="small" link type="primary" @click="handleShow(scope.$index, scope.row)">详情</el-button> -->
+          <el-button size="small" link type="warning" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="small" link type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -289,10 +354,7 @@ watch(chooseTag, (newVal, oldVal) => {
           <el-input v-model="addForm.addr" autocomplete="off" />
         </el-form-item>
         <el-form-item label="标签">
-          <DynamicTags @pushTags="getTags"></DynamicTags>
-          <!-- <el-input v-model="addForm.tags"
-                    autocomplete="off"
-                    placeholder="多个英文逗号分隔" /> -->
+          <DynamicTags @pushTags="getTags" :dynamicTags="[]"></DynamicTags>
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="addForm.remark" type="textarea" autocomplete="off" />
@@ -301,7 +363,36 @@ watch(chooseTag, (newVal, oldVal) => {
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogFormVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleAdd">保存</el-button>
+          <el-button type="primary" @click="handleAdd">新增</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="dialogEditFormVisible" :close-on-click-modal=false title="编辑信息">
+      <el-form :model="editForm">
+        <el-form-item label="名称">
+          <el-input v-model="editForm.name" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="账号">
+          <el-input v-model="editForm.account" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="editForm.password" type="password" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="地址">
+          <el-input v-model="editForm.addr" autocomplete="off" />
+        </el-form-item>
+        <el-form-item label="标签">
+          <DynamicTags @pushTags="getEditTags" :dynamicTags="dynamicTags"></DynamicTags>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="editForm.remark" type="textarea" autocomplete="off" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogEditFormVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleEditSave">保存修改</el-button>
         </span>
       </template>
     </el-dialog>

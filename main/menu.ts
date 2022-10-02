@@ -20,10 +20,10 @@ const AppMenu = [
     label: '操作',
     submenu: [
       {
-        label: '锁定工具',
+        label: '锁定程序',
         accelerator: 'ctrl+l',
         click: () => {
-          console.log('锁定工具')
+          console.log('锁定程序')
           const win = BrowserWindow.getFocusedWindow()
           if (win) {
             win.webContents.send('ipc_menu_click', 'CLOCK_PAGE')

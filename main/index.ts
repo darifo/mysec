@@ -8,6 +8,7 @@ import {
   IPC_GET_LIST_REQ,
   IPC_GET_TAG_LIST_REQ,
   IPC_DELETE_DATA,
+  IPC_EDIT_DATA,
 } from './ipcs'
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
@@ -33,3 +34,4 @@ ipcMain.on('ipc_save_data', IPC_SAVE_DATA)
 ipcMain.on('ipc_get_list_req', IPC_GET_LIST_REQ)
 ipcMain.on('ipc_get_tag_list_req', IPC_GET_TAG_LIST_REQ)
 ipcMain.on('ipc_delete_data', IPC_DELETE_DATA)
+ipcMain.on('ipc_edit_data', IPC_EDIT_DATA)

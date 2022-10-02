@@ -147,3 +147,25 @@ export const IPC_DELETE_DATA = async (e: any, data: any) => {
     console.log('removed:' + numRemoved)
   })
 }
+
+// 处理修改数据
+export const IPC_EDIT_DATA = (e: any, data: any) => {
+  // console.log(data)
+  const updateData = {
+    name: data.name,
+    password: AES.encrypt(data.password),
+    account: data.account,
+    addr: data.addr,
+    tags: data.tags,
+    remark: data.remark,
+    t: data.t,
+  }
+  dbData.update(
+    { _id: data._id },
+    updateData,
+    {},
+    function (err: string, numReplaced: number) {
+      // console.log(err, numReplaced)
+    },
+  )
+}
