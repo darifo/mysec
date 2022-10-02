@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ElMessage, ElMessageBox } from "element-plus";
-import { split } from "lodash";
 import DynamicTags from "./DynamicTags.vue";
 import AES from './aes'
-
 import {
   computed,
   inject,
@@ -14,17 +12,12 @@ import {
   toRaw,
   watch,
 } from "vue";
-// import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { string } from "yargs";
 
 let dialogFormVisible = ref(false);
 let dialogEditFormVisible = ref(false);
-
 const main = inject("$main") as any;
-
 const ipc = main.ipcRenderer;
-// const Router = useRouter();
 const store = useStore();
 let addForm = reactive({
   name: "",
@@ -48,11 +41,12 @@ let tableData: any[] = reactive([]);
 let totalCount = ref(0);
 let pageSize = ref(5)
 let curPage = ref(1);
-
 let search = ref("");
 let tagList = ref([]);
 let chooseTag = ref([]);
 let height = computed(() => store.state.doc_height);
+
+// 处理复制账号
 const handleCopyAccount = (index: number, account: string) => {
   main.clipboard.writeText(account, 'selection')
   ElMessage({
@@ -60,6 +54,8 @@ const handleCopyAccount = (index: number, account: string) => {
     type: "success",
   });
 };
+
+// 处理复制密码
 const handleCopyPassword = (index: number, password: string) => {
   main.clipboard.writeText(AES.decrypt(password), 'selection')
   ElMessage({
@@ -68,8 +64,9 @@ const handleCopyPassword = (index: number, password: string) => {
   });
 };
 
+// 复制整行
 const handleCopy = (index: number, row: any) => {
-  console.log(index, row);
+  // console.log(index, row);
   const copyRow = {
     name: row.name,
     password: AES.decrypt(row.password),
@@ -84,9 +81,6 @@ const handleCopy = (index: number, row: any) => {
     type: "success",
   });
 };
-// const handleShow = (index: number, row: any) => {
-//   console.log(index, row);
-// };
 
 // 点击编辑按钮
 const handleEdit = (index: number, row: any) => {
@@ -103,6 +97,7 @@ const handleEdit = (index: number, row: any) => {
   // 传递给子组件
   dynamicTags.value = toRaw(row.tags)
 };
+
 // 提交编辑保存
 const handleEditSave = () => {
   let sendData = {
@@ -126,6 +121,7 @@ const handleEditSave = () => {
   // console.log(sendData);
 }
 
+// 点击删除按钮
 const handleDelete = (index: number, row: any) => {
 
   ElMessageBox.confirm(
@@ -149,6 +145,8 @@ const handleDelete = (index: number, row: any) => {
     .catch(() => { })
 
 };
+
+// 发送主进程 新增数据
 const handleAdd = () => {
   // console.log(addForm);
   let sendData = {
@@ -176,11 +174,13 @@ const handleAdd = () => {
   sendGetTagListReq();
 };
 
+// 页码变更
 const curPageChange = (val: number) => {
   // console.log(val);
   sendGetListReq([], search.value, val);
 };
 
+// 获取数据列表回调
 const listGetListener = (e: string, data: any) => {
   // console.log(data);
   totalCount.value = data.count;
@@ -200,11 +200,13 @@ const listGetListener = (e: string, data: any) => {
   }
 };
 
+// 获取标签列表回调
 const listGetTagListener = (e: string, data: any) => {
   // console.log(data);
   tagList.value = data
 }
 
+// 请求获取数据列表
 const sendGetListReq = (tags: string[], search: string, page_num: number) => {
   ipc.send("ipc_get_list_req", {
     msg: "请求查询列表数据",
@@ -215,13 +217,16 @@ const sendGetListReq = (tags: string[], search: string, page_num: number) => {
   });
 };
 
+// 请求获取标签列表
 const sendGetTagListReq = () => {
   ipc.send('ipc_get_tag_list_req', { msg: "请求获取标签列表数据！" });
 }
 
+// 新增- 从子组件获取标签
 const getTags = (tags: any) => {
   addForm.tags = tags
 }
+// 编辑- 从子组件获取标签
 const getEditTags = (tags: any) => {
   editForm.tags = tags
 }
@@ -240,14 +245,18 @@ onUnmounted(() => {
   ipc.removeListener("ipc_get_list", listGetTagListener);
 });
 
+// 监听搜索框内容变化
 watch(search, (newVal: string, oldVal: string) => {
   // console.log(newVal, oldVal);
   sendGetListReq([], search.value, 1);
 });
+
+// 监听下拉选择变化
 watch(chooseTag, (newVal, oldVal) => {
   // console.log(toRaw(newVal));
   sendGetListReq(toRaw(newVal), search.value, 1);
 });
+
 </script>
 
 <template>
@@ -285,9 +294,6 @@ watch(chooseTag, (newVal, oldVal) => {
     <br />
 
     <el-table :data="tableData" style="width: 100%">
-      <!-- <el-table-column label="ID"
-                       prop="_id"
-                       width="60px" /> -->
       <el-table-column label="名称" prop="name" />
       <el-table-column label="账号" prop="account">
         <template v-slot="scope">

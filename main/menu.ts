@@ -10,7 +10,7 @@ const AppMenu = [
       {
         label: '退出程序',
         click: () => {
-          console.log('退出程序')
+          // console.log('退出程序')
           app.quit()
         },
       },
@@ -23,23 +23,23 @@ const AppMenu = [
         label: '锁定程序',
         accelerator: 'ctrl+l',
         click: () => {
-          console.log('锁定程序')
+          // console.log('锁定程序')
           const win = BrowserWindow.getFocusedWindow()
           if (win) {
             win.webContents.send('ipc_menu_click', 'CLOCK_PAGE')
           }
         },
       },
-      // {
-      //   label: '修改主密码',
-      //   click: () => {
-      //     console.log('修改主密码')
-      //     const win = BrowserWindow.getFocusedWindow()
-      //     if (win) {
-      //       win.webContents.send('ipc_menu_click', 'RESET_ROOT_PWD')
-      //     }
-      //   },
-      // },
+      {
+        label: '修改主密码',
+        click: () => {
+          // console.log('修改主密码')
+          const win = BrowserWindow.getFocusedWindow()
+          if (win) {
+            win.webContents.send('ipc_menu_click', 'RESET_ROOT_PWD')
+          }
+        },
+      },
     ],
   },
   {
@@ -48,7 +48,7 @@ const AppMenu = [
       {
         label: '检查更新',
         click: () => {
-          console.log('检查更新')
+          // console.log('检查更新')
           autoUpdater.checkForUpdatesAndNotify()
           const win = BrowserWindow.getFocusedWindow()
           if (win) {
@@ -59,7 +59,7 @@ const AppMenu = [
       {
         label: '贡献代码',
         click: () => {
-          console.log('贡献代码')
+          // console.log('贡献代码')
           const win = BrowserWindow.getFocusedWindow()
           if (win) {
             // win.webContents.send('ipc_menu_click', 'COMMIT_CODE')
@@ -70,7 +70,7 @@ const AppMenu = [
       {
         label: '关于程序',
         click: () => {
-          console.log('关于程序')
+          // console.log('关于程序')
           const win = BrowserWindow.getFocusedWindow()
           if (win) {
             win.webContents.send('ipc_menu_click', 'ABOUT_ME')

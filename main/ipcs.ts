@@ -1,8 +1,18 @@
 import { dbUser, dbData } from './repo'
 import AES from './aes'
 
+type AddForm = {
+  name: string
+  password: string
+  account: string
+  addr: string
+  tags: string
+  remark: string
+}
+
+// 登录检查主密码
 export const IPC_CHECK_ROOT = async (e: any, data: any) => {
-  console.log(data)
+  // console.log(data)
   let doc: any
   const getOne = () => {
     return new Promise((resolve) => {
@@ -19,8 +29,9 @@ export const IPC_CHECK_ROOT = async (e: any, data: any) => {
   e.sender.send('ipc_check_result', { rStatus: rStatus })
 }
 
+// 初始化设置主密码
 export const IPC_SET_ROOT_PWD = async (e: any, data: string) => {
-  console.log(data)
+  // console.log(data)
   // 清理用户
   dbUser.remove(
     {},
@@ -31,18 +42,9 @@ export const IPC_SET_ROOT_PWD = async (e: any, data: string) => {
   dbUser.insert(
     { account: 'root', password: AES.encrypt(data) },
     (err: string, newDoc: any) => {
-      console.log(newDoc)
+      // console.log(newDoc)
     },
   )
-}
-
-type AddForm = {
-  name: string
-  password: string
-  account: string
-  addr: string
-  tags: string
-  remark: string
 }
 
 // 处理新增数据
@@ -57,13 +59,13 @@ export const IPC_SAVE_DATA = (e: any, data: AddForm) => {
     t: Date.parse(new Date().toString()),
   }
   dbData.insert(insertData, (err: string, newDoc: any) => {
-    console.log(newDoc)
+    // console.log(newDoc)
   })
 }
 
 // 监听请求获取列表数据
 export const IPC_GET_LIST_REQ = async (e: any, data: any) => {
-  console.log(data)
+  // console.log(data)
   const search = data.search
   const tags = data.tags
   const pageNum = data.page_num
@@ -144,7 +146,7 @@ export const IPC_GET_TAG_LIST_REQ = async (e: any, data: any) => {
 export const IPC_DELETE_DATA = async (e: any, data: any) => {
   // console.log(data)
   dbData.remove({ _id: data }, {}, function (err: string, numRemoved: number) {
-    console.log('removed:' + numRemoved)
+    // console.log('removed:' + numRemoved)
   })
 }
 
@@ -166,6 +168,43 @@ export const IPC_EDIT_DATA = (e: any, data: any) => {
     {},
     function (err: string, numReplaced: number) {
       // console.log(err, numReplaced)
+    },
+  )
+}
+
+// 检查主密码是否正确
+export const IPC_RESET_CHECK_ROOT_PWD = async (e: any, data: any) => {
+  let doc: any
+  const getOne = () => {
+    return new Promise((resolve) => {
+      dbUser.findOne(
+        { account: 'root', password: AES.encrypt(data.password) },
+        function (err: string, doc: any) {
+          resolve(doc)
+        },
+      )
+    })
+  }
+  doc = await getOne()
+  // console.log(doc)
+  let rStatus: boolean = doc === null ? false : true
+  e.sender.send('ipc_reset_check_root_res', { rStatus: rStatus })
+}
+
+// 处理修改主密码
+export const IPC_RESET_ROOT_PWD = async (e: any, data: any) => {
+  // console.log(data)
+  // 清理用户
+  dbUser.remove(
+    {},
+    { multi: true },
+    function (err: string, numRemoved: number) {},
+  )
+  // 插入新用户
+  dbUser.insert(
+    { account: 'root', password: AES.encrypt(data.password) },
+    (err: string, newDoc: any) => {
+      // console.log(newDoc)
     },
   )
 }

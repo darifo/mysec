@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { inject, onMounted, onUnmounted, ref } from "vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+import { inject, onMounted, onUnmounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 
@@ -11,18 +12,74 @@ const Router = useRouter();
 let dialogAboutVisible = ref(false);
 let version = ref("0.0.0");
 
+const showUpdater = ref(false)
+const downloadProcess: any = ref({})
+
+const editRootVisible = ref(false);
+let userForm = reactive({
+  old_password: "",
+  new_password: "",
+  re_new_password: ""
+})
+
+// 编辑主密码保存按钮
+const handleEditRootSave = () => {
+  if (userForm.old_password === "" || userForm.new_password === "") {
+    ElMessageBox.alert("密码不能为空！", "警告", {});
+  } else if (userForm.new_password.length < 8) {
+    ElMessageBox.alert("密码长度必须大于等于8位字符！", "警告", {});
+  } else if (userForm.new_password !== userForm.re_new_password) {
+    ElMessageBox.alert("两次输入新密码不一致～", "警告", {});
+  } else {
+    // 先检查原主密码是否正确
+    ipc.send("ipc_reset_check_root_pwd", {
+      msg: "请求检查主密码是否正确",
+      password: userForm.old_password,
+    });
+  }
+}
+
+// 修改主密码回调
+const listenerCheckResetRes = (e: string, data: any) => {
+  // console.log(data);
+  if (data.rStatus === true) {
+    let sendData = {
+      password: userForm.new_password,
+    }
+    ipc.send('ipc_reset_root_pwd', sendData)
+    ElMessage({
+      message: "主密码修改成功！",
+      type: "success",
+    })
+    userForm.new_password = ""
+    userForm.old_password = ""
+    userForm.re_new_password = ""
+    editRootVisible.value = false
+    Router.push({
+      name: "HOME",
+      params: {},
+    });
+  } else {
+    ElMessageBox.alert("主密码错误！", "警告", {});
+  }
+}
+
+// 获取app信息回调
 const ipcAppInfoListener = (e: string, data: any) => {
-  console.log("ipc_recive_app_info:", data);
+  // console.log("ipc_recive_app_info:", data);
   store.commit("SAVE_APP_INFO", data);
   version.value = store.state.app_info.app_version;
 };
 
+// 获取窗口尺寸变更回调
 const ipcWinResizeListener = (e: string, data: any) => {
-  console.log("ipc_win_resize:", data);
+  // console.log("ipc_win_resize:", data);
   store.commit("RESIZE_WIN", data);
 };
+
+// 主进程菜单点击事件
 const ipcMenuClickListener = (e: string, code: string) => {
-  console.log("ipc_menu_click:", code);
+  // console.log("ipc_menu_click:", code);
   if (code === "ABOUT_ME") {
     dialogAboutVisible.value = true;
   }
@@ -33,13 +90,15 @@ const ipcMenuClickListener = (e: string, code: string) => {
     });
   }
   if (code === "CHECK_UPDATE") {
-    console.log("CHECK_UPDATE");
+    // console.log("CHECK_UPDATE");
+  }
+  if (code === "RESET_ROOT_PWD") {
+    // console.log("RESET_ROOT_PWD");
+    editRootVisible.value = true
   }
 };
 
-const showUpdater = ref(false)
-const downloadProcess: any = ref({})
-
+// 程序更新事件回调
 const ipcUpdateListener = (e: string, info: any) => {
   // console.log("ipc_updater:");
   // console.log(info.status);
@@ -72,6 +131,8 @@ onMounted(() => {
   ipc.on("ipc_menu_click", ipcMenuClickListener);
   // 监听更新
   ipc.on("ipc_updater", ipcUpdateListener);
+  // 检查主密码是否正确回调
+  ipc.on("ipc_reset_check_root_res", listenerCheckResetRes);
 });
 
 onUnmounted(() => {
@@ -79,6 +140,7 @@ onUnmounted(() => {
   // ipc.removeListener("ipc_win_resize", ipcWinResizeListener);
   // ipc.removeListener("ipc_menu_click", ipcMenuClickListener);
   ipc.removeListener("ipc_updater", ipcUpdateListener)
+  ipc.removeListener("ipc_reset_check_root_res", listenerCheckResetRes)
 });
 </script>
 
@@ -112,6 +174,32 @@ onUnmounted(() => {
       <el-progress :text-inside="true" :stroke-width="18" :percentage="downloadProcess.percent.toFixed(2)">
       </el-progress>
       <p>正在下载 ( {{ byteToM(downloadProcess.bytesPerSecond) }} Mb/s ) ......</p>
+    </template>
+  </el-dialog>
+
+  <el-dialog v-model="editRootVisible" :close-on-click-modal=false title="修改主密码">
+    <el-form :model="userForm">
+      <el-form-item label="验证旧密码" prop="old_password" :rules="[
+        { required: true, message: 'password is required' },
+      ]">
+        <el-input v-model="userForm.old_password" type="password" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="输入新密码" prop="new_password" :rules="[
+        { required: true, message: 'password is required' },
+      ]">
+        <el-input v-model="userForm.new_password" type="password" autocomplete="off" />
+      </el-form-item>
+      <el-form-item label="重复新密码" prop="re_new_password" :rules="[
+        { required: true, message: 'password is required' },
+      ]">
+        <el-input v-model="userForm.re_new_password" type="password" autocomplete="off" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="editRootVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleEditRootSave">提交</el-button>
+      </span>
     </template>
   </el-dialog>
 

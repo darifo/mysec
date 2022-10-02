@@ -28,7 +28,7 @@ export const createWindow = async () => {
   win.on('resized', () => {
     const docHeight = win.getSize()[1] - 100
     const docWidth = win.getSize()[0]
-    console.log(docHeight, docWidth)
+    // console.log(docHeight, docWidth)
     win.webContents.send('ipc_win_resize', {
       height: docHeight,
       width: docWidth,
@@ -37,7 +37,7 @@ export const createWindow = async () => {
   // 窗口显示的时候给渲染进程发送初始窗口尺寸
   const docHeight = win.getSize()[1] - 100
   const docWidth = win.getSize()[0]
-  console.log(docHeight, docWidth)
+  // console.log(docHeight, docWidth)
   win.webContents.send('ipc_win_resize', { height: docHeight, width: docWidth })
 
   // 程序运行目录 查询是否已经设置好root密码

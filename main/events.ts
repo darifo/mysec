@@ -1,4 +1,4 @@
-import { app, BrowserWindow,shell } from 'electron'
+import { app, BrowserWindow, shell } from 'electron'
 import { createWindow } from './window'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 // import autoUpdater from './updater'
@@ -25,8 +25,11 @@ export const WinAllClose = () => {
 }
 
 export const WebContentsCreated = (e: any, webContents: any) => {
-  webContents.on('new-window', (event: any, url: string) => {
-    event.preventDefault()
-    shell.openExternal(url)
+  // 处理 window.open 跳转
+  webContents.setWindowOpenHandler((data: any) => {
+    shell.openExternal(data.url)
+    return {
+      action: 'deny',
+    }
   })
 }

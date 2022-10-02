@@ -8,15 +8,14 @@ const main = inject("$main") as any;
 const ipc = main.ipcRenderer;
 const Router = useRouter();
 const store = useStore();
-let users = {};
 let height = computed(() => store.state.doc_height);
 let UserForm = reactive({ password: "" });
 const loginButton = computed(() => store.state.app_info.is_init_root);
 const setPwdButton = computed(() => !store.state.app_info.is_init_root);
 const setPwdButtonDisable = computed(() => UserForm.password == "");
 
+// 检查主密码回调
 const listenerfun = (e: string, data: any) => {
-  // console.log(data);
   if (data.rStatus === true) {
     Router.push({
       name: "LIST",
@@ -26,11 +25,9 @@ const listenerfun = (e: string, data: any) => {
     ElMessageBox.alert("主密码错误！", "警告", {});
   }
 };
+
+// 登录按钮点击
 const loginCheck = () => {
-  // Router.push({
-  //     name: "LIST",
-  //     params: {},
-  //   });
   if (UserForm.password == "") {
     ElMessageBox.alert("密码不能为空！", "警告", {});
   } else if (UserForm.password.length < 8) {
@@ -42,9 +39,11 @@ const loginCheck = () => {
     });
   }
 };
+
+// 设置密码按钮点击
 const setRootPassword = () => {
   // 校验密码
-  if (UserForm.password == "") {
+  if (UserForm.password === "") {
     ElMessageBox.alert("密码不能为空！", "警告", {});
   } else if (UserForm.password.length < 8) {
     ElMessageBox.alert("密码长度必须大于等于8位字符！", "警告", {});
@@ -56,8 +55,8 @@ const setRootPassword = () => {
   }
 };
 
+// 输入框回车拦截
 const enterInputHandler = () => {
-  // console.log(loginButton.value, setPwdButton.value);
   if (loginButton.value) {
     loginCheck();
   }
@@ -77,31 +76,18 @@ onUnmounted(() => {
 
 <template>
   <el-container>
-    <el-main class="cc"
-             :style="{'height': height + 'px'}">
-      <el-form @submit.enter.prevent
-               :model="UserForm"
-               :inline="true">
-        <el-form-item label="密码"
-                      prop="password"
-                      :rules="[
-                        { required: true, message: 'password is required' },
-                      ]">
-          <el-input v-model.number="UserForm.password"
-                    @keyup.enter="enterInputHandler"
-                    type="password"
-                    autocomplete="off" />
+    <el-main class="cc" :style="{'height': height + 'px'}">
+      <el-form @submit.enter.prevent :model="UserForm" :inline="true">
+        <el-form-item label="密码" prop="password" :rules="[
+          { required: true, message: 'password is required' },
+        ]">
+          <el-input v-model.number="UserForm.password" @keyup.enter="enterInputHandler" type="password"
+            autocomplete="off" />
         </el-form-item>
         <el-form-item>
-          <el-button v-if="loginButton"
-                     type="primary"
-                     size="small"
-                     @click="loginCheck">验证</el-button>
-          <el-button v-if="setPwdButton"
-                     type="primary"
-                     size="small"
-                     :disabled="setPwdButtonDisable"
-                     @click="setRootPassword">设置密码</el-button>
+          <el-button v-if="loginButton" type="primary" size="small" @click="loginCheck">验证</el-button>
+          <el-button v-if="setPwdButton" type="primary" size="small" :disabled="setPwdButtonDisable"
+            @click="setRootPassword">设置密码</el-button>
         </el-form-item>
       </el-form>
     </el-main>

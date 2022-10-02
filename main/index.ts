@@ -9,6 +9,8 @@ import {
   IPC_GET_TAG_LIST_REQ,
   IPC_DELETE_DATA,
   IPC_EDIT_DATA,
+  IPC_RESET_ROOT_PWD,
+  IPC_RESET_CHECK_ROOT_PWD,
 } from './ipcs'
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
@@ -35,3 +37,5 @@ ipcMain.on('ipc_get_list_req', IPC_GET_LIST_REQ)
 ipcMain.on('ipc_get_tag_list_req', IPC_GET_TAG_LIST_REQ)
 ipcMain.on('ipc_delete_data', IPC_DELETE_DATA)
 ipcMain.on('ipc_edit_data', IPC_EDIT_DATA)
+ipcMain.on('ipc_reset_check_root_pwd', IPC_RESET_CHECK_ROOT_PWD)
+ipcMain.on('ipc_reset_root_pwd', IPC_RESET_ROOT_PWD)
