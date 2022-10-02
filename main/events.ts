@@ -1,6 +1,7 @@
 import { app, BrowserWindow,shell } from 'electron'
 import { createWindow } from './window'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+// import autoUpdater from './updater'
 
 export const Redy = async () => {
   createWindow()
@@ -10,6 +11,11 @@ export const Redy = async () => {
   if (!app.isPackaged) {
     await installExtension(VUEJS_DEVTOOLS)
   }
+  // // 每次运行APP检测更新。这里设置延时是为了避免还未开始渲染，更新检测就已经完成(网速超快，页面加载跟不上)。
+  // setTimeout(() => {
+  //   // 检测是否有更新
+  //   autoUpdater.checkForUpdatesAndNotify()
+  // }, 10000)
 }
 
 export const WinAllClose = () => {

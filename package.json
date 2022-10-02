@@ -1,7 +1,7 @@
 {
   "name": "mysec",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "信息管理工具",
   "author": {
     "email": "2248961461@qq.com",
@@ -13,13 +13,16 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "electron:build": "rimraf dist && vite build && electron-builder",
-    "build:mac": "rimraf dist && vite build && electron-builder --macos",
-    "build:win": "rimraf dist && vite build && electron-builder --windows",
+    "build:mac-arm64": "rimraf dist && vite build && electron-builder --mac --arm64 --publish always",
+    "build:mac-x64": "rimraf dist && vite build && electron-builder --mac --x64 --publish always",
+    "build:win32-x64": "rimraf dist && vite build && electron-builder --windows --x64 --publish always",
+    "build:win32-x32": "rimraf dist && vite build && electron-builder --windows --ia32 --publish always",
+    "electron:publish": "rimraf dist && vite build && electron-builder --publish always",
     "electron:icons": "electron-icon-builder --input=./src/assets/logo.png --output=./resource/"
   },
   "dependencies": {
     "crypto-js": "^4.1.1",
+    "electron-updater": "^5.2.1",
     "element-plus": "^2.2.17",
     "nedb": "^1.8.0",
     "vue": "^3.2.37",
@@ -45,6 +48,14 @@
     "copyright": "Copyright © 2022 by darifo",
     "directories": {
       "output": "dist_electron"
+    },
+    "publish": {
+      "provider": "github",
+      "repo": "mysec",
+      "owner": "darifo",
+      "private": false,
+      "releaseType": "release",
+      "publishAutoUpdate": true
     },
     "nsis": {
       "oneClick": false,
@@ -79,7 +90,8 @@
         {
           "target": "nsis",
           "arch": [
-            "x64"
+            "x64",
+            "ia32"
           ]
         }
       ]

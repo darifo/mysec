@@ -143,11 +143,7 @@ export const IPC_GET_TAG_LIST_REQ = async (e: any, data: any) => {
 // 删除数据行
 export const IPC_DELETE_DATA = async (e: any, data: any) => {
   // console.log(data)
-  dbData.remove(
-    { _id: data },
-    {},
-    function (err: string, numRemoved: number) {
-      console.log('removed:' + numRemoved)
-    },
-  )
+  dbData.remove({ _id: data }, {}, function (err: string, numRemoved: number) {
+    console.log('removed:' + numRemoved)
+  })
 }

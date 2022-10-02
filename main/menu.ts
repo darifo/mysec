@@ -1,6 +1,7 @@
 // ================== 存放 APP 的菜单及处理逻辑  ===================== //
 
 import { app, BrowserWindow, shell } from 'electron'
+import autoUpdater from './updater'
 
 const AppMenu = [
   {
@@ -44,16 +45,17 @@ const AppMenu = [
   {
     label: '其他',
     submenu: [
-      // {
-      //   label: '联系作者',
-      //   click: () => {
-      //     console.log('联系作者')
-      //     const win = BrowserWindow.getFocusedWindow()
-      //     if (win) {
-      //       win.webContents.send('ipc_menu_click', 'CALL_AUTHOR')
-      //     }
-      //   },
-      // },
+      {
+        label: '检查更新',
+        click: () => {
+          console.log('检查更新')
+          autoUpdater.checkForUpdatesAndNotify()
+          const win = BrowserWindow.getFocusedWindow()
+          if (win) {
+            win.webContents.send('ipc_menu_click', 'CHECK_UPDATE')
+          }
+        },
+      },
       {
         label: '贡献代码',
         click: () => {
@@ -61,7 +63,7 @@ const AppMenu = [
           const win = BrowserWindow.getFocusedWindow()
           if (win) {
             // win.webContents.send('ipc_menu_click', 'COMMIT_CODE')
-            shell.openExternal("https://github.com/darifo/mysec")
+            shell.openExternal('https://github.com/darifo/mysec')
           }
         },
       },

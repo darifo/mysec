@@ -16,6 +16,12 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 let menuBuilder = Menu.buildFromTemplate(AppMenu)
 Menu.setApplicationMenu(menuBuilder)
 
+// Object.defineProperty(app, 'isPackaged', {
+//   get() {
+//     return true;
+//   }
+// });
+
 app.whenReady().then(Redy)
 app.on('window-all-closed', WinAllClose)
 // 拦截渲染进程里面的所有新开窗口事件，用默认浏览器打开
