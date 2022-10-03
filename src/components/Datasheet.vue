@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ElMessage, ElMessageBox } from "element-plus";
-import DynamicTags from "./DynamicTags.vue";
-import AES from './aes'
+import AES from '../aes'
 import {
   computed,
   inject,
@@ -13,31 +12,19 @@ import {
   watch,
 } from "vue";
 import { useStore } from "vuex";
+import AddData from "./AddData.vue";
+import EditData from "./EditData.vue";
 
-let dialogFormVisible = ref(false);
-let dialogEditFormVisible = ref(false);
 const main = inject("$main") as any;
 const ipc = main.ipcRenderer;
 const store = useStore();
-let addForm = reactive({
-  name: "",
-  password: "",
-  account: "",
-  addr: "",
-  tags: [],
-  remark: "",
-});
-let editForm = reactive({
-  _id: "",
-  name: "",
-  password: "",
-  account: "",
-  addr: "",
-  tags: [],
-  remark: "",
-  t: ""
-});
-let tableData: any[] = reactive([]);
+
+const subFuncRef = ref<any>();
+
+let dialogAddFormVisible = ref(false);
+let dialogEditFormVisible = ref(false);
+
+let tableData: object[] = reactive([{}])
 let totalCount = ref(0);
 let pageSize = ref(5)
 let curPage = ref(1);
@@ -82,45 +69,6 @@ const handleCopy = (index: number, row: any) => {
   });
 };
 
-// 点击编辑按钮
-const handleEdit = (index: number, row: any) => {
-  // console.log(index, row);
-  dialogEditFormVisible.value = true
-  editForm._id = row.ID
-  editForm.account = row.account
-  editForm.name = row.name
-  editForm.password = AES.decrypt(row.password)
-  editForm.addr = row.addr
-  editForm.tags = toRaw(row.tags)
-  editForm.remark = row.remark
-  editForm.t = row.t
-  // 传递给子组件
-  dynamicTags.value = toRaw(row.tags)
-};
-
-// 提交编辑保存
-const handleEditSave = () => {
-  let sendData = {
-    _id: editForm._id,
-    name: editForm.name,
-    password: editForm.password,
-    account: editForm.account,
-    tags: toRaw(editForm.tags),
-    addr: editForm.addr,
-    remark: editForm.remark,
-    t: editForm.t
-  }
-  ipc.send("ipc_edit_data", sendData);
-  ElMessage({
-    message: "编辑成功！",
-    type: "success",
-  });
-  dialogEditFormVisible.value = false;
-  sendGetListReq([], search.value, 1);
-  sendGetTagListReq();
-  // console.log(sendData);
-}
-
 // 点击删除按钮
 const handleDelete = (index: number, row: any) => {
 
@@ -146,34 +94,6 @@ const handleDelete = (index: number, row: any) => {
 
 };
 
-// 发送主进程 新增数据
-const handleAdd = () => {
-  // console.log(addForm);
-  let sendData = {
-    name: addForm.name,
-    password: addForm.password,
-    account: addForm.account,
-    tags: toRaw(addForm.tags),
-    addr: addForm.addr,
-    remark: addForm.remark,
-  }
-  // console.log(sendData);
-  ipc.send("ipc_save_data", sendData);
-  ElMessage({
-    message: "添加成功！",
-    type: "success",
-  });
-  addForm.name = "";
-  addForm.account = "";
-  addForm.password = "";
-  addForm.addr = "";
-  addForm.tags.length = 0;
-  addForm.remark = "";
-  dialogFormVisible.value = false;
-  sendGetListReq([], search.value, 1);
-  sendGetTagListReq();
-};
-
 // 页码变更
 const curPageChange = (val: number) => {
   // console.log(val);
@@ -184,20 +104,22 @@ const curPageChange = (val: number) => {
 const listGetListener = (e: string, data: any) => {
   // console.log(data);
   totalCount.value = data.count;
+  // 清空旧表数据
   tableData.length = 0;
-  for (let item of data.docs) {
-    const line = {
-      name: item.name,
-      password: item.password,
-      account: item.account,
-      addr: item.addr,
-      tags: item.tags,
-      remark: item.remark,
-      ID: item._id,
-      t: item.t
+  for (let i = 0; i < data.docs.length; i++) {
+    const lineData = {
+      name: data.docs[i].name,
+      password: data.docs[i].password,
+      account: data.docs[i].account,
+      addr: data.docs[i].addr,
+      tags: data.docs[i].tags,
+      remark: data.docs[i].remark,
+      ID: data.docs[i]._id,
+      t: data.docs[i].t
     };
-    tableData.push(line);
+    tableData.push(lineData);
   }
+  // console.log(tableData);
 };
 
 // 获取标签列表回调
@@ -207,11 +129,11 @@ const listGetTagListener = (e: string, data: any) => {
 }
 
 // 请求获取数据列表
-const sendGetListReq = (tags: string[], search: string, page_num: number) => {
+const sendGetListReq = (rtags: string[], search: string, page_num: number) => {
   ipc.send("ipc_get_list_req", {
     msg: "请求查询列表数据",
     search: search,
-    tags: tags,
+    tags: rtags,
     page_num: page_num,
     page_size: pageSize.value,
   });
@@ -222,16 +144,32 @@ const sendGetTagListReq = () => {
   ipc.send('ipc_get_tag_list_req', { msg: "请求获取标签列表数据！" });
 }
 
-// 新增- 从子组件获取标签
-const getTags = (tags: any) => {
-  addForm.tags = tags
+// 点击添加按钮
+const handleOpenAddForm = () => {
+  dialogAddFormVisible.value = true
 }
-// 编辑- 从子组件获取标签
-const getEditTags = (tags: any) => {
-  editForm.tags = tags
+
+// 点击编辑按钮
+const handleEdit = (index: number, row: any) => {
+  dialogEditFormVisible.value = true
+  subFuncRef.value.getRowData(row);
+};
+
+// 关闭添加窗口
+const closeAddFrom = (data: any) => {
+  dialogAddFormVisible.value = false
 }
-// 定义子组件修改使用的数据
-const dynamicTags: any = ref([]);
+
+// 刷新数据列表-添加数据后
+const refreshListAfterAdd = (data: any) => {
+  sendGetListReq([], search.value, 1);
+  sendGetTagListReq();  
+}
+
+// 关闭编辑窗口
+const closeEditForm = (data: any) => {
+  dialogEditFormVisible.value = false
+}
 
 onMounted(() => {
   ipc.on("ipc_get_list", listGetListener);
@@ -242,12 +180,12 @@ onMounted(() => {
 
 onUnmounted(() => {
   ipc.removeListener("ipc_get_list", listGetListener);
-  ipc.removeListener("ipc_get_list", listGetTagListener);
+  ipc.removeListener("ipc_get_tag_list", listGetTagListener);
 });
 
 // 监听搜索框内容变化
 watch(search, (newVal: string, oldVal: string) => {
-  // console.log(newVal, oldVal);
+  // console.log(newVal);
   sendGetListReq([], search.value, 1);
 });
 
@@ -281,8 +219,7 @@ watch(chooseTag, (newVal, oldVal) => {
     <el-row>
       <el-col :span="12">
         <div class="grid-content" style="float:left">
-          <el-button type="primary" @click="dialogFormVisible = true">添加</el-button>
-
+          <el-button type="primary" @click="handleOpenAddForm">添加</el-button>
         </div>
       </el-col>
       <el-col :span="12">
@@ -300,7 +237,6 @@ watch(chooseTag, (newVal, oldVal) => {
           <el-link @click="handleCopyAccount(scope.$index, scope.row.account);" :underline="false" style="color:red">
             {{scope.row.account}}</el-link>
         </template>
-
       </el-table-column>
       <el-table-column label="密码" prop="password">
         <template v-slot="scope">
@@ -345,64 +281,9 @@ watch(chooseTag, (newVal, oldVal) => {
     <br />
     <el-tag type="info">查询共计：{{totalCount}} 条数据</el-tag>
 
-    <el-dialog v-model="dialogFormVisible" :close-on-click-modal=false title="添加信息">
-      <el-form :model="addForm">
-        <el-form-item label="名称">
-          <el-input v-model="addForm.name" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="账号">
-          <el-input v-model="addForm.account" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="addForm.password" type="password" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="地址">
-          <el-input v-model="addForm.addr" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="标签">
-          <DynamicTags @pushTags="getTags" :dynamicTags="[]"></DynamicTags>
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="addForm.remark" type="textarea" autocomplete="off" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleAdd">新增</el-button>
-        </span>
-      </template>
-    </el-dialog>
-
-    <el-dialog v-model="dialogEditFormVisible" :close-on-click-modal=false title="编辑信息">
-      <el-form :model="editForm">
-        <el-form-item label="名称">
-          <el-input v-model="editForm.name" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="账号">
-          <el-input v-model="editForm.account" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="editForm.password" type="password" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="地址">
-          <el-input v-model="editForm.addr" autocomplete="off" />
-        </el-form-item>
-        <el-form-item label="标签">
-          <DynamicTags @pushTags="getEditTags" :dynamicTags="dynamicTags"></DynamicTags>
-        </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="editForm.remark" type="textarea" autocomplete="off" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogEditFormVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleEditSave">保存修改</el-button>
-        </span>
-      </template>
-    </el-dialog>
-
+    <AddData @closeMe="closeAddFrom" @refreshList="refreshListAfterAdd" :dialogVisible="dialogAddFormVisible"></AddData>
+    <EditData @closeMe="closeEditForm" @refreshList="refreshListAfterAdd" :dialogVisible="dialogEditFormVisible"
+      ref="subFuncRef"></EditData>
   </div>
 </template>
 

@@ -1,9 +1,13 @@
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, globalShortcut, shell } from 'electron'
 import { createWindow } from './window'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 // import autoUpdater from './updater'
 
 export const Redy = async () => {
+  // 注册全局快捷键
+  // globalShortcut.register('Alt+M', function () {
+  //   console.log("Alt+M");
+  // })
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

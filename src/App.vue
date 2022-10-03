@@ -94,6 +94,9 @@ const ipcMenuClickListener = (e: string, code: string) => {
   }
   if (code === "RESET_ROOT_PWD") {
     // console.log("RESET_ROOT_PWD");
+    userForm.old_password = ""
+    userForm.new_password = ""
+    userForm.re_new_password = ""
     editRootVisible.value = true
   }
 };
@@ -147,10 +150,14 @@ onUnmounted(() => {
 <template>
   <router-view />
 
-  <el-dialog v-model="dialogAboutVisible" :close-on-click-modal=false title="关于程序">
+  <el-dialog v-model="dialogAboutVisible" :close-on-click-modal=true title="关于程序">
     <div class="grid-content bg-purple-light">
       <el-divider content-position="left">Mysec(本地版)</el-divider>
-      <div> 是一款免费的工具类程序，用于存储管理工作中各种繁杂的系统账号密码、密钥、地址等重要信息。</div>
+      <div>
+        是一款免费的系统账号管理工具，用于存储管理工作中各种繁杂的系统账号密码、密钥、地址等重要信息；
+        密码采用 AES 算法加密存储, 您可以通过点击打开目标系统地址，也可以点击复制系统账号或密码用于快速登录；
+        可以通过标签筛选、模糊搜索快速的找到您想用的系统账号和地址等信息；
+      </div>
       <el-divider>
       </el-divider>
       Copyright © 2022 by

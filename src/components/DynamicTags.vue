@@ -1,5 +1,5 @@
 <template>
-  <el-tag v-for="tag in dynamicTags" :key="tag" class="mx-1" closable :disable-transitions="false"
+  <el-tag v-for="tag in subTags" :key="tag" class="mx-1" closable :disable-transitions="false"
     @close="handleClose(tag)">
     {{ tag }}
   </el-tag>
@@ -11,27 +11,18 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, ref ,toRefs } from "vue";
+import { nextTick, ref } from "vue";
 import { ElInput } from "element-plus";
 
 const emit = defineEmits(["pushTags"])
-
-//子组件接收父组件传递过来的值
-const props = defineProps<{
-  dynamicTags: string[],
-}>();
-
-//使用父组件传递过来的值
-const { dynamicTags } = toRefs(props)
-
 const inputValue = ref("");
-// const dynamicTags = ref<string[]>([]);
+let subTags = ref<string[]>([]);
 const inputVisible = ref(false);
 const InputRef = ref<InstanceType<typeof ElInput>>();
 
 const handleClose = (tag: string) => {
-  dynamicTags.value.splice(dynamicTags.value.indexOf(tag), 1);
-  emit("pushTags", dynamicTags.value)
+  subTags.value.splice(subTags.value.indexOf(tag), 1);
+  emit("pushTags", subTags.value)
 };
 
 const showInput = () => {
@@ -43,10 +34,10 @@ const showInput = () => {
 
 const handleInputConfirm = () => {
   if (inputValue.value) {
-    dynamicTags.value.push(inputValue.value);
+    subTags.value.push(inputValue.value);
   }
   inputVisible.value = false;
   inputValue.value = "";
-  emit("pushTags", dynamicTags.value)
+  emit("pushTags", subTags.value)
 };
 </script>

@@ -21,7 +21,7 @@ const AppMenu = [
     submenu: [
       {
         label: '锁定程序',
-        accelerator: 'ctrl+l',
+        accelerator: 'ctrl+m+l',
         click: () => {
           // console.log('锁定程序')
           const win = BrowserWindow.getFocusedWindow()
