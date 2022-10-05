@@ -1,5 +1,7 @@
 # Mysec 
 
+![Mysec](https://github.com/darifo/mysec/blob/main/resource/icons/png/256x256.png?raw=true)
+
 
 - 是一款免费的系统账号管理工具，用于存储管理工作中各种繁杂的系统账号密码、密钥、地址等重要信息；
 
@@ -7,21 +9,18 @@
 
 - 可以通过标签筛选、模糊搜索快速的找到您想用的系统账号和地址等信息；
 
-注：数据库文件位置：{用户目录}/mysec/mysec_data.db
+注：数据库文件位置：{用户目录}/mysec_data.db
 
 mac：
 ```
-/Users/{username}/Library/Application Support/mysec
+/Users/{ username }/Library/Application Support/mysec
 ```
 windows：
 ```
-C:\Users\{username}\...
+C:\Users\{ username }\AppData\Roaming\mysec
 ```
 
 --- 
-
-![Mysec](https://github.com/darifo/mysec/blob/main/resource/icons/png/256x256.png?raw=true)
-
 
 ### 技术栈
 
@@ -34,6 +33,10 @@ C:\Users\{username}\...
 - Nedb
 - ...
 
+### 软件下载
+
+由于墙内GitHub速度慢，这里提供微云下载方式：
+https://share.weiyun.com/47BKzrPq
 
 ### 软件截图
 
