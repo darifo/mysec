@@ -94,10 +94,19 @@ const handleDelete = (index: number, row: any) => {
 
 };
 
+// 改变每页显示条数
+const handleSizeChange = (val: number) => {
+  // console.log(`${val} items per page`)
+  // 每页显示数量更新
+  pageSize.value = val
+  // 重新请求第一页
+  sendGetListReq(toRaw(chooseTag.value), search.value, 1);
+}
+
 // 页码变更
 const curPageChange = (val: number) => {
   // console.log(val);
-  sendGetListReq([], search.value, val);
+  sendGetListReq(toRaw(chooseTag.value), search.value, val);
 };
 
 // 获取数据列表回调
@@ -163,7 +172,7 @@ const closeAddFrom = (data: any) => {
 // 刷新数据列表-添加数据后
 const refreshListAfterAdd = (data: any) => {
   sendGetListReq([], search.value, 1);
-  sendGetTagListReq();  
+  sendGetTagListReq();
 }
 
 // 关闭编辑窗口
@@ -186,7 +195,7 @@ onUnmounted(() => {
 // 监听搜索框内容变化
 watch(search, (newVal: string, oldVal: string) => {
   // console.log(newVal);
-  sendGetListReq([], search.value, 1);
+  sendGetListReq(toRaw(chooseTag.value), search.value, 1);
 });
 
 // 监听下拉选择变化
@@ -275,8 +284,9 @@ watch(chooseTag, (newVal, oldVal) => {
 
     <br />
 
-    <el-pagination background layout="prev, pager, next" :total="totalCount" :page-size="pageSize"
-      v-model:currentPage="curPage" @current-change="curPageChange" />
+    <el-pagination background layout="prev, pager, next, sizes" :page-sizes="[5, 10, 15, 20]"
+      :default-page-size="pageSize" :total="totalCount" v-model:currentPage="curPage" @current-change="curPageChange"
+      @size-change="handleSizeChange" />
 
     <br />
     <el-tag type="info">查询共计：{{totalCount}} 条数据</el-tag>

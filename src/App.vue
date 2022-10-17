@@ -3,6 +3,8 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { inject, onMounted, onUnmounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import type { TabsPaneContext } from 'element-plus'
+import Tools from './tools';
 
 const main = inject("$main") as any;
 const ipc = main.ipcRenderer;
@@ -21,6 +23,56 @@ let userForm = reactive({
   new_password: "",
   re_new_password: ""
 })
+
+const toolBoxVisible = ref(false);
+const activeName = ref('pwd_gen');
+const handleClickToolTab = (tab: TabsPaneContext, event: Event) => {
+  // console.log(tab, event)
+}
+
+const pwdSize = ref(6);
+const pwdGenRule = ref("r1");
+const pwdGenRuleOptions = [
+  { value: "r1", label: "纯数字" },
+  { value: "r2", label: "纯字母" },
+  { value: "r3", label: "数字+小写字母" },
+  { value: "r4", label: "数字+大写字母" },
+  { value: "r5", label: "数字+大小写字母" },
+  { value: "r6", label: "数字+大小写字母+特殊字符" },
+]
+const pwdStr = ref("待生成...");
+
+// 生成密码按钮点击
+const genPwdCode = () => {
+  console.log(pwdGenRule.value);
+  if (pwdGenRule.value == "r1") {
+    pwdStr.value = Tools.makeStringInNum(pwdSize.value);
+  }
+  if (pwdGenRule.value == "r2") {
+    pwdStr.value = Tools.makeStringInChar(pwdSize.value);
+  }
+  if (pwdGenRule.value == "r3") {
+    pwdStr.value = Tools.makeStringInNumAndCharLower(pwdSize.value);
+  }
+  if (pwdGenRule.value == "r4") {
+    pwdStr.value = Tools.makeStringInNumAndCharUpper(pwdSize.value);
+  }
+  if (pwdGenRule.value == "r5") {
+    pwdStr.value = Tools.makeStringInNumAndChar(pwdSize.value);
+  }
+  if (pwdGenRule.value == "r6") {
+    pwdStr.value = Tools.makeStringInNumAndCharAll(pwdSize.value);
+  }
+}
+
+// 复制生成的密码
+const copyPwdStr = () => {
+  main.clipboard.writeText(pwdStr.value, 'selection')
+  ElMessage({
+    message: "复制成功！ ",
+    type: "success",
+  });
+}
 
 // 编辑主密码保存按钮
 const handleEditRootSave = () => {
@@ -99,6 +151,9 @@ const ipcMenuClickListener = (e: string, code: string) => {
     userForm.re_new_password = ""
     editRootVisible.value = true
   }
+  if (code === "TOOLS_CHAR_GEN") {
+    toolBoxVisible.value = true;
+  }
 };
 
 // 程序更新事件回调
@@ -150,6 +205,7 @@ onUnmounted(() => {
 <template>
   <router-view />
 
+  <!-- 关于程序窗口 -->
   <el-dialog v-model="dialogAboutVisible" :close-on-click-modal=true title="关于程序">
     <div class="grid-content bg-purple-light">
       <el-divider content-position="left">Mysec(本地版)</el-divider>
@@ -174,6 +230,7 @@ onUnmounted(() => {
     </div>
   </el-dialog>
 
+  <!-- 应用更新窗口 -->
   <el-dialog title="应用更新......" v-model="showUpdater" :close-on-click-modal="false" :show-close="false"
     :close-on-press-escape="false">
     <template v-if="downloadProcess">
@@ -184,6 +241,7 @@ onUnmounted(() => {
     </template>
   </el-dialog>
 
+  <!-- 修改主密码窗口 -->
   <el-dialog v-model="editRootVisible" :close-on-click-modal=false title="修改主密码">
     <el-form :model="userForm">
       <el-form-item label="验证旧密码" prop="old_password" :rules="[
@@ -208,6 +266,27 @@ onUnmounted(() => {
         <el-button type="primary" @click="handleEditRootSave">提交</el-button>
       </span>
     </template>
+  </el-dialog>
+
+
+  <!-- 字符串工具窗口 -->
+  <el-dialog v-model="toolBoxVisible" :fullscreen="true" :close-on-click-modal=false title="工具箱">
+    <el-tabs v-model="activeName" @tab-click="handleClickToolTab">
+      <el-tab-pane label="密码生成器" name="pwd_gen" style="text-align:left;line-height: 50px;">
+        设置密码位数：
+        <el-input-number v-model="pwdSize" :min="6" :max="128" />
+        <br>
+        设置生成规则：
+        <el-select v-model="pwdGenRule" placeholder="选择">
+          <el-option v-for="item in pwdGenRuleOptions" :key="item.value" :label="item.label" :value="item.value" />
+        </el-select>
+        <br>
+        <el-button type="success" @click="genPwdCode">立即生成</el-button>
+        <br>
+        <el-link type="danger" :underline="false" style="color:red" @click="copyPwdStr">{{pwdStr}}</el-link>
+      </el-tab-pane>
+      <el-tab-pane label="加解密" name="encry_decry">功能开发中...</el-tab-pane>
+    </el-tabs>
   </el-dialog>
 
 </template>

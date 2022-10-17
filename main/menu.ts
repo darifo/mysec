@@ -21,7 +21,7 @@ const AppMenu = [
     submenu: [
       {
         label: '锁定程序',
-        accelerator: 'ctrl+m+l',
+        accelerator: 'ctrl+shift+l',
         click: () => {
           // console.log('锁定程序')
           const win = BrowserWindow.getFocusedWindow()
@@ -37,6 +37,21 @@ const AppMenu = [
           const win = BrowserWindow.getFocusedWindow()
           if (win) {
             win.webContents.send('ipc_menu_click', 'RESET_ROOT_PWD')
+          }
+        },
+      },
+    ],
+  },
+  {
+    label: '工具',
+    submenu: [
+      {
+        label: '打开工具箱',
+        click: () => {
+          // console.log('字符生成器')
+          const win = BrowserWindow.getFocusedWindow()
+          if (win) {
+            win.webContents.send('ipc_menu_click', 'TOOLS_CHAR_GEN')
           }
         },
       },
