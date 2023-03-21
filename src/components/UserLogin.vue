@@ -2,7 +2,7 @@
 import { computed, inject, ref, onMounted, reactive, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { ElMessageBox } from "_element-plus@2.2.17@element-plus";
+import { ElMessageBox } from "element-plus";
 
 const main = inject("$main") as any;
 const ipc = main.ipcRenderer;

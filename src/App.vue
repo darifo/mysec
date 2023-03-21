@@ -3,8 +3,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { inject, onMounted, onUnmounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import type { TabsPaneContext } from 'element-plus'
-import Tools from './tools';
+import ToolBox from './components/ToolBox.vue'
 
 const main = inject("$main") as any;
 const ipc = main.ipcRenderer;
@@ -25,54 +24,6 @@ let userForm = reactive({
 })
 
 const toolBoxVisible = ref(false);
-const activeName = ref('pwd_gen');
-const handleClickToolTab = (tab: TabsPaneContext, event: Event) => {
-  // console.log(tab, event)
-}
-
-const pwdSize = ref(6);
-const pwdGenRule = ref("r1");
-const pwdGenRuleOptions = [
-  { value: "r1", label: "纯数字" },
-  { value: "r2", label: "纯字母" },
-  { value: "r3", label: "数字+小写字母" },
-  { value: "r4", label: "数字+大写字母" },
-  { value: "r5", label: "数字+大小写字母" },
-  { value: "r6", label: "数字+大小写字母+特殊字符" },
-]
-const pwdStr = ref("待生成...");
-
-// 生成密码按钮点击
-const genPwdCode = () => {
-  console.log(pwdGenRule.value);
-  if (pwdGenRule.value == "r1") {
-    pwdStr.value = Tools.makeStringInNum(pwdSize.value);
-  }
-  if (pwdGenRule.value == "r2") {
-    pwdStr.value = Tools.makeStringInChar(pwdSize.value);
-  }
-  if (pwdGenRule.value == "r3") {
-    pwdStr.value = Tools.makeStringInNumAndCharLower(pwdSize.value);
-  }
-  if (pwdGenRule.value == "r4") {
-    pwdStr.value = Tools.makeStringInNumAndCharUpper(pwdSize.value);
-  }
-  if (pwdGenRule.value == "r5") {
-    pwdStr.value = Tools.makeStringInNumAndChar(pwdSize.value);
-  }
-  if (pwdGenRule.value == "r6") {
-    pwdStr.value = Tools.makeStringInNumAndCharAll(pwdSize.value);
-  }
-}
-
-// 复制生成的密码
-const copyPwdStr = () => {
-  main.clipboard.writeText(pwdStr.value, 'selection')
-  ElMessage({
-    message: "复制成功！ ",
-    type: "success",
-  });
-}
 
 // 编辑主密码保存按钮
 const handleEditRootSave = () => {
@@ -156,11 +107,13 @@ const ipcMenuClickListener = (e: string, code: string) => {
   }
 };
 
+// 关闭工具窗口
+const closeToolWin = (data: any) => {
+  toolBoxVisible.value = false
+}
+
 // 程序更新事件回调
 const ipcUpdateListener = (e: string, info: any) => {
-  // console.log("ipc_updater:");
-  // console.log(info.status);
-  // console.log(info.info);
   if (info.status === "progress") {
     showUpdater.value = true
     downloadProcess.value = info.info
@@ -172,7 +125,6 @@ const ipcUpdateListener = (e: string, info: any) => {
     showUpdater.value = false
   }
 }
-
 // 字节转兆
 const byteToM = (num: number) => {
   if (num <= 0) return 0.00;
@@ -268,26 +220,7 @@ onUnmounted(() => {
     </template>
   </el-dialog>
 
-
-  <!-- 字符串工具窗口 -->
-  <el-dialog v-model="toolBoxVisible" :fullscreen="true" :close-on-click-modal=false title="工具箱">
-    <el-tabs v-model="activeName" @tab-click="handleClickToolTab">
-      <el-tab-pane label="密码生成器" name="pwd_gen" style="text-align:left;line-height: 50px;">
-        设置密码位数：
-        <el-input-number v-model="pwdSize" :min="6" :max="128" />
-        <br>
-        设置生成规则：
-        <el-select v-model="pwdGenRule" placeholder="选择">
-          <el-option v-for="item in pwdGenRuleOptions" :key="item.value" :label="item.label" :value="item.value" />
-        </el-select>
-        <br>
-        <el-button type="success" @click="genPwdCode">立即生成</el-button>
-        <br>
-        <el-link type="danger" :underline="false" style="color:red" @click="copyPwdStr">{{pwdStr}}</el-link>
-      </el-tab-pane>
-      <el-tab-pane label="加解密" name="encry_decry">功能开发中...</el-tab-pane>
-    </el-tabs>
-  </el-dialog>
+  <ToolBox @closeMe="closeToolWin" :boxVisible="toolBoxVisible"></ToolBox>
 
 </template>
 
